@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessible E-Learning Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Using Google Fonts for better readability -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Inter:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <nav aria-label="Main Navigation">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-universal-access" aria-hidden="true"></i>
+                <span>AccessLearn</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active" aria-current="page">Home</a></li>
+                <li><a href="#modules">Modules</a></li>
+                <li><a href="#assessment">Assessment</a></li>
+                <li><a href="#audio-mode" id="audio-mode-toggle"><i class="fas fa-headphones"></i> Audio Mode</a></li>
+                <li><button id="voice-command-btn"
+                        style="background:none; border:none; color:inherit; font:inherit; cursor:pointer;"><i
+                            class="fas fa-microphone"></i> Voice Control</button></li>
+            </ul>
+            <div class="user-controls">
+                <a href="teacher.html" aria-label="Teacher and Caregiver Panel"><i
+                        class="fas fa-chalkboard-teacher"></i> Teacher Panel</a>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        <section class="hero">
+            <h1>Learning for Everyone</h1>
+            <p>An inclusive platform designed with you in mind.</p>
+            <button id="start-learning-btn" class="cta-button">Start Learning <i
+                    class="fas fa-arrow-right"></i></button>
+        </section>
+
+        <section id="modules" aria-labelledby="modules-title">
+            <h2 id="modules-title">Learning Modules</h2>
+            <div class="card-grid">
+                <article class="card">
+                    <h3>Mathematics</h3>
+                    <p>Basic arithmetic and geometry.</p>
+                    <a href="module.html?id=math" class="cta-button"
+                        style="text-decoration:none; display:inline-block;">Start Module</a>
+                </article>
+                <article class="card">
+                    <h3>Science</h3>
+                    <p>Explore the world around you.</p>
+                    <a href="module.html?id=science" class="cta-button"
+                        style="text-decoration:none; display:inline-block;">Start Module</a>
+                </article>
+                <article class="card">
+                    <h3>Language Arts</h3>
+                    <p>Reading, writing, and communication.</p>
+                    <a href="module.html?id=language" class="cta-button"
+                        style="text-decoration:none; display:inline-block;">Start Module</a>
+                </article>
+                <article class="card">
+                    <h3>Computer Science</h3>
+                    <p>Coding and digital skills.</p>
+                    <a href="module.html?id=cs" class="cta-button"
+                        style="text-decoration:none; display:inline-block;">Start Module</a>
+                </article>
+                <article class="card">
+                    <h3>Art & Music</h3>
+                    <p>Creative expression and history.</p>
+                    <a href="module.html?id=art" class="cta-button"
+                        style="text-decoration:none; display:inline-block;">Start Module</a>
+                </article>
+                <article class="card">
+                    <h3>Life Skills</h3>
+                    <p>Cooking, finance, and daily living.</p>
+                    <a href="module.html?id=life" class="cta-button"
+                        style="text-decoration:none; display:inline-block;">Start Module</a>
+                </article>
+                <article class="card">
+                    <h3>Physical Education</h3>
+                    <p>Fitness, yoga, and health.</p>
+                    <a href="module.html?id=pe" class="cta-button"
+                        style="text-decoration:none; display:inline-block;">Start Module</a>
+                </article>
+                <article class="card">
+                    <h3>History & Geography</h3>
+                    <p>Past events and world cultures.</p>
+                    <a href="module.html?id=history" class="cta-button"
+                        style="text-decoration:none; display:inline-block;">Start Module</a>
+                </article>
+            </div>
+        </section>
+
+        <section id="accessibility-hub" aria-labelledby="hub-title">
+            <h2 id="hub-title">Accessibility Tools</h2>
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <h3><i class="fas fa-file-pdf"></i> PDF Reader</h3>
+                    <p>Upload a book to have it read aloud.</p>
+                    <input type="file" id="pdf-upload" accept=".pdf,.txt" aria-label="Upload PDF or Text File">
+                    <div id="pdf-content" class="text-output" aria-live="polite">No file loaded.</div>
+                    <div class="pdf-controls" style="margin-top: 10px;">
+                        <button id="read-pdf-btn" disabled><i class="fas fa-play"></i> Read</button>
+                        <button id="pause-pdf-btn" disabled><i class="fas fa-pause"></i> Pause</button>
+                        <button id="stop-pdf-btn" disabled><i class="fas fa-stop"></i> Stop</button>
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <h3><i class="fas fa-microphone"></i> Dictation Pad (Audio to Text)</h3>
+                    <p>Speak to convert your voice to text.</p>
+                    <button id="start-dictation"><i class="fas fa-microphone-alt"></i> Start Dictation</button>
+                    <textarea id="dictation-output" placeholder="Your speech will appear here..." rows="5"></textarea>
+                </div>
+
+                <div class="tool-card">
+                    <h3><i class="fas fa-users"></i> Voice Settings</h3>
+                    <label for="voice-select">Choose a Voice:</label>
+                    <select id="voice-select">
+                        <option value="default">Default Voice</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section id="library" aria-labelledby="library-title">
+            <h2 id="library-title">Digital Library</h2>
+            <div class="card-grid">
+                <article class="card">
+                    <h3><i class="fas fa-book"></i> Space Science</h3>
+                    <button class="read-book-btn" data-book="Space Science">Read Book</button>
+                </article>
+                <article class="card">
+                    <h3><i class="fas fa-book"></i> Great History</h3>
+                    <button class="read-book-btn" data-book="History">Read Book</button>
+                </article>
+                <article class="card">
+                    <h3><i class="fas fa-book"></i> Computer Basics</h3>
+                    <button class="read-book-btn" data-book="Computer Basics">Read Book</button>
+                </article>
+            </div>
+        </section>
+
+        <section id="assessment" aria-labelledby="assessment-title">
+            <h2 id="assessment-title">Assessment Zone</h2>
+            <p>Take a quiz to test your knowledge with voice support and extra time options.</p>
+            <button class="secondary-button">Go to Assessments</button>
+        </section>
+    </main>
+
+    <aside class="sign-language-panel" aria-label="Sign Language Interpreter">
+        <div class="sl-video-placeholder">
+            <i class="fas fa-hands-asl-interpreting"></i>
+            <p>Sign Language Interpreter</p>
+        </div>
+        <div class="sl-controls">
+            <button id="toggle-sl" aria-label="Toggle Sign Language">Hide</button>
+        </div>
+    </aside>
+
+    <div id="emergency-support">
+        <button id="emergency-btn" aria-label="Emergency Help">
+            <i class="fas fa-exclamation-triangle"></i> Help
+        </button>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 AccessLearn Platform. Built for Accessibility.</p>
+    </footer>
+
+    <script src="sign_dictionary.js"></script>
+    <iframe id="pdf-viewer-frame" style="display:none;"></iframe>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>
+        // Initialize PDF.js worker
+        if (window.pdfjsLib) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+
+</html>

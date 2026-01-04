@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Viewer - AccessLearn</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <nav aria-label="Module Navigation">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="index.html"
+                    style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Home</span>
+                </a>
+            </div>
+            <div class="user-controls">
+                <button id="audio-mode-toggle" aria-label="Toggle Audio Mode"><i class="fas fa-headphones"></i> Audio
+                    Mode</button>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        <section class="module-container" style="max-width: 800px; margin: 2rem auto; padding: 2rem;">
+            <div id="module-header" style="text-align: center; margin-bottom: 2rem;">
+                <i id="module-icon" class="fas fa-book"
+                    style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                <h1 id="module-title">Loading Module...</h1>
+            </div>
+
+            <div class="card" style="padding: 3rem; font-size: 1.25rem; line-height: 1.8;">
+                <div id="module-content">
+                    Please select a valid module.
+                </div>
+            </div>
+
+            <div class="controls"
+                style="text-align: center; margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+                <button id="play-module" class="cta-button"><i class="fas fa-play"></i> Read Aloud</button>
+                <button id="pause-module" class="secondary-button"><i class="fas fa-pause"></i> Pause</button>
+                <button id="stop-module" class="secondary-button"><i class="fas fa-stop"></i> Stop</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Sign Language Panel (Reused) -->
+    <aside class="sign-language-panel" aria-label="Sign Language Interpreter" style="display: block;">
+        <div class="sl-video-placeholder">
+            <i class="fas fa-hands-asl-interpreting" id="sl-icon"></i>
+            <p id="sl-text" style="font-size: 1.5rem; font-weight: bold; margin-top: 1rem;">...</p>
+        </div>
+        <div class="sl-controls">
+            <small>Live Sign Sync</small>
+        </div>
+    </aside>
+
+    <script src="data.js"></script>
+    <script src="sign_dictionary.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const moduleId = params.get('id');
+
+            const titleEl = document.getElementById('module-title');
+            const contentEl = document.getElementById('module-content');
+            const iconEl = document.getElementById('module-icon');
+            const slIcon = document.getElementById('sl-icon');
+            const slText = document.getElementById('sl-text');
+
+            let synthesis = window.speechSynthesis;
+            let currentUtterance = null;
+
+            if (moduleId && moduleData[moduleId]) {
+                const data = moduleData[moduleId];
+                titleEl.textContent = data.title;
+                contentEl.textContent = data.content;
+                iconEl.className = data.icon;
+            } else {
+                titleEl.textContent = "Module Not Found";
+                contentEl.textContent = "Sorry, we couldn't find that module.";
+            }
+
+            // Audio Mode Toggle (Simple reuse)
+            document.getElementById('audio-mode-toggle').addEventListener('click', () => {
+                document.body.classList.toggle('high-contrast');
+            });
+
+            // Play Logic with Sync
+            document.getElementById('play-module').addEventListener('click', () => {
+                if (!moduleId || !moduleData[moduleId]) return;
+
+                synthesis.cancel(); // Stop previous
+                const text = moduleData[moduleId].content;
+                currentUtterance = new SpeechSynthesisUtterance(text);
+                currentUtterance.rate = 0.9;
+
+                // SYNC IMPLEMENTATION
+                currentUtterance.onboundary = (event) => {
+                    if (event.name === 'word') {
+                        // Get the word
+                        const charIndex = event.charIndex;
+                        const charLength = event.charLength || text.indexOf(' ', charIndex) - charIndex;
+                        let word = text.substring(charIndex, charIndex + charLength).trim().replace(/[.,]/g, '');
+
+                        if (word) {
+                            word = word.toUpperCase();
+                            slText.textContent = word;
+
+                            // 1. Clean panel
+                            const slContainer = document.querySelector('.sl-video-placeholder');
+                            slContainer.innerHTML = '';
+                            slContainer.style.background = "#fff";
+                            slContainer.style.display = "flex";
+                            slContainer.style.flexWrap = "wrap";
+                            slContainer.style.justifyContent = "center";
+                            slContainer.style.alignItems = "center";
+                            slContainer.style.gap = "2px";
+                            slContainer.style.padding = "10px";
+                            slContainer.style.minHeight = "150px";
+                            slIcon.style.display = 'none';
+
+                            // 2. Loop characters for Fingerspelling
+                            const cleanWord = word.trim().replace(/[^a-zA-Z]/g, '');
+
+                            for (let char of cleanWord) {
+                                const signSrc = typeof getFingerSpellingImage === 'function' ? getFingerSpellingImage(char) : null;
+                                if (signSrc) {
+                                    const img = document.createElement('img');
+                                    img.src = signSrc;
+                                    img.alt = `Sign ${char}`;
+                                    img.title = char;
+                                    img.style.width = "40px";
+                                    img.style.height = "auto";
+                                    img.style.margin = "2px";
+                                    img.className = 'sign-img';
+                                    slContainer.appendChild(img);
+                                }
+                            }
+
+                            // 3. Label
+                            const label = document.createElement('div');
+                            label.textContent = word;
+                            label.style.width = "100%";
+                            label.style.textAlign = "center";
+                            label.style.marginTop = "10px";
+                            label.style.fontWeight = "bold";
+                            label.style.color = "#333";
+                            slContainer.appendChild(label);
+                        }
+                    }
+                };
+
+                currentUtterance.onend = () => {
+                    // Reset UI when done
+                    slIcon.style.display = 'inline-block';
+                    slText.textContent = "...";
+                    const existingImages = document.querySelector('.sl-video-placeholder').querySelectorAll('.sign-img');
+                    existingImages.forEach(img => img.remove());
+                };
+
+                synthesis.speak(currentUtterance);
+            });
+
+            document.getElementById('pause-module').addEventListener('click', () => {
+                if (synthesis.paused) synthesis.resume();
+                else synthesis.pause();
+            });
+
+            document.getElementById('stop-module').addEventListener('click', () => {
+                synthesis.cancel();
+            });
+        });
+    </script>
+</body>
+
+</html>

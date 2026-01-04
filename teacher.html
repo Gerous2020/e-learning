@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Panel - AccessLearn</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <nav aria-label="Teacher Navigation">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
+                <span>Teacher Access</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Back to Student View</a></li>
+                <li><a href="#" class="active">Dashboard</a></li>
+                <li><a href="#settings">Settings</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <h1>Caregiver & Teacher Dashboard</h1>
+            <p>Monitor progress and adjust accessibility settings.</p>
+        </section>
+
+        <section id="student-progress">
+            <h2>Student Progress</h2>
+            <table aria-label="Student Progress Table"
+                style="width: 100%; text-align: left; border-collapse: collapse; margin-top: 1rem;">
+                <thead>
+                    <tr style="background: var(--secondary-color); color: white;">
+                        <th style="padding: 1rem;">Student Name</th>
+                        <th style="padding: 1rem;">Module</th>
+                        <th style="padding: 1rem;">Last Assessment</th>
+                        <th style="padding: 1rem;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #ccc;">
+                        <td style="padding: 1rem;">Alex Doe</td>
+                        <td style="padding: 1rem;">Mathematics</td>
+                        <td style="padding: 1rem;">8/10</td>
+                        <td style="padding: 1rem;"><span style="color: green; font-weight: bold;">Good</span></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #ccc;">
+                        <td style="padding: 1rem;">Jordan Smith</td>
+                        <td style="padding: 1rem;">Science</td>
+                        <td style="padding: 1rem;">4/10</td>
+                        <td style="padding: 1rem;"><span style="color: red; font-weight: bold;">Needs Help</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="settings">
+            <h2>Accessibility Overrides</h2>
+            <div class="card">
+                <h3>Global Settings</h3>
+                <label for="contrast-override" style="display: block; margin: 1rem 0;">
+                    <input type="checkbox" id="contrast-override"> Force High Contrast for All
+                </label>
+                <label for="audio-override" style="display: block; margin: 1rem 0;">
+                    <input type="checkbox" id="audio-override"> Enable Auto-Read on Load
+                </label>
+                <button class="cta-button">Save Changes</button>
+            </div>
+        </section>
+
+
+    </main>
+
+    <footer>
+        <p>&copy; 2024 AccessLearn Platform. Teacher Panel.</p>
+    </footer>
+</body>
+
+</html>

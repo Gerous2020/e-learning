@@ -1,0 +1,352 @@
+:root {
+    --bg-color: #f4f4f9;
+    --text-color: #1a1a1a;
+    --primary-color: #0056b3;
+    --primary-hover: #004494;
+    --secondary-color: #2c3e50;
+    --accent-color: #e74c3c;
+    --card-bg: #ffffff;
+    --focus-ring: 4px solid #ffcc00;
+    --font-heading: 'inter', sans-serif;
+    --font-body: 'Atkinson Hyperlegible', sans-serif;
+    /* Great for legibility */
+}
+
+/* High Contrast Mode Class */
+body.high-contrast {
+    --bg-color: #000000;
+    --text-color: #ffff00;
+    --primary-color: #00ffff;
+    --primary-hover: #00cccc;
+    --secondary-color: #ffffff;
+    --accent-color: #ff0000;
+    --card-bg: #1a1a1a;
+    --focus-ring: 4px solid #ffffff;
+}
+
+/* Hide images in audio/high-contrast mode to reduce distraction */
+body.high-contrast img:not([alt]),
+body.high-contrast .hero p {
+    /* If we had background images, we'd handle them here. 
+       For now, we simplify the layout. */
+    display: none;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    font-size: 1.125rem;
+    /* 18px base size */
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Skip Link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--primary-color);
+    color: white;
+    padding: 8px;
+    z-index: 1000;
+    transition: top 0.2s;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Typography */
+h1,
+h2,
+h3 {
+    font-family: var(--font-heading);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 3rem;
+}
+
+h2 {
+    font-size: 2.5rem;
+}
+
+h3 {
+    font-size: 1.75rem;
+}
+
+/* Buttons */
+button,
+.cta-button,
+.secondary-button {
+    font-family: var(--font-heading);
+    cursor: pointer;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: 2px;
+}
+
+.cta-button {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.cta-button:hover {
+    background: var(--primary-hover);
+    transform: scale(1.05);
+}
+
+.secondary-button {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+/* Navigation */
+nav {
+    background: var(--card-bg);
+    padding: 1rem 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 600;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--primary-color);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 5rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Sections */
+section {
+    padding: 4rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Cards */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.card {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 2px solid transparent;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+}
+
+/* Tools Grid */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.tool-card {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.text-output,
+textarea,
+select {
+    width: 100%;
+    padding: 0.5rem;
+    margin: 1rem 0;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    background: #f9f9f9;
+    font-family: var(--font-body);
+}
+
+.text-output {
+    min-height: 100px;
+    background: #fff;
+    overflow-y: auto;
+}
+
+textarea {
+    resize: vertical;
+}
+
+/* Sign Language Panel */
+.sign-language-panel {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    /* Left side to clear emergency button */
+    width: 200px;
+    background: var(--card-bg);
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    z-index: 900;
+}
+
+.sl-video-placeholder {
+    height: 250px;
+    background: #ddd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    text-align: center;
+    padding: 1rem;
+}
+
+.sl-video-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.sl-controls {
+    text-align: center;
+    padding: 0.5rem;
+    background: var(--secondary-color);
+}
+
+.sl-controls button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9rem;
+    background: transparent;
+    color: white;
+    border: 1px solid white;
+}
+
+/* Emergency Button */
+#emergency-support {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+}
+
+#emergency-btn {
+    background-color: var(--accent-color);
+    color: white;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+    animation: pulse 2s infinite;
+}
+
+#emergency-btn i {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+    }
+
+    70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 20px rgba(231, 76, 60, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+    }
+}
+
+footer {
+    text-align: center;
+    padding: 2rem;
+    background: var(--secondary-color);
+    color: white;
+    margin-top: 4rem;
+}
+
+/* Accessibility Utilities */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
