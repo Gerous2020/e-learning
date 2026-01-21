@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - AccessLearn</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- jsPDF for Certificate Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <a href="index.html" style="color:var(--primary-color); text-decoration:none;">AccessLearn</a>
+            </div>
+            <div class="user-controls">
+                <span id="user-name-display" style="font-weight:bold; margin-right:1rem;"></span>
+                <a href="#" onclick="api.logout()" class="secondary-button" style="padding: 5px 10px;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        <section>
+            <h1>My Learning Dashboard</h1>
+            <p>Track your progress and certifications.</p>
+        </section>
+
+        <section class="card-grid">
+            <!-- Mock Progress Data -->
+            <article class="card">
+                <h3>Mathematics</h3>
+                <div style="background:#ddd; height:10px; border-radius:5px; margin:10px 0;">
+                    <div style="background:green; width:100%; height:100%; border-radius:5px;"></div>
+                </div>
+                <p>Status: <strong>Completed (100%)</strong></p>
+                <p>Grade: <strong>A+</strong></p>
+                <button class="cta-button" onclick="generateCertificate('Mathematics')">
+                    <i class="fas fa-certificate"></i> Download Certificate
+                </button>
+            </article>
+
+            <article class="card">
+                <h3>Science</h3>
+                <div style="background:#ddd; height:10px; border-radius:5px; margin:10px 0;">
+                    <div style="background:orange; width:60%; height:100%; border-radius:5px;"></div>
+                </div>
+                <p>Status: <strong>In Progress (60%)</strong></p>
+                <button class="secondary-button" onclick="location.href='module.html?id=science'">
+                    Continue Learning
+                </button>
+            </article>
+        </section>
+    </main>
+
+    <script src="client-api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = api.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('user-name-display').textContent = "Welcome, " + user.name;
+        });
+
+        // Certificate Generation Logic
+        async function generateCertificate(courseName) {
+            const user = api.getUser();
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+
+            // Border
+            doc.setLineWidth(3);
+            doc.rect(10, 10, 277, 190);
+
+            // Header
+            doc.setFontSize(40);
+            doc.setTextColor(0, 86, 179); // Primary Blue
+            doc.text("CERTIFICATE OF COMPLETION", 148.5, 50, { align: "center" });
+
+            // Body
+            doc.setFontSize(20);
+            doc.setTextColor(50, 50, 50);
+            doc.text("This is to certify that", 148.5, 80, { align: "center" });
+
+            doc.setFontSize(30);
+            doc.setFont("helvetica", "bold");
+            doc.text(user.name, 148.5, 100, { align: "center" });
+
+            doc.setFontSize(20);
+            doc.setFont("helvetica", "normal");
+            doc.text("has successfully completed the course", 148.5, 120, { align: "center" });
+
+            doc.setFontSize(25);
+            doc.setTextColor(231, 76, 60); // Accent Red
+            doc.text(courseName, 148.5, 140, { align: "center" });
+
+            // Date
+            const date = new Date().toLocaleDateString();
+            doc.setFontSize(15);
+            doc.setTextColor(100);
+            doc.text(`Date Issued: ${date}`, 148.5, 170, { align: "center" });
+
+            // Footer
+            doc.setFontSize(12);
+            doc.text("AccessLearn E-Learning Platform", 148.5, 190, { align: "center" });
+
+            doc.save(`Certificate_${courseName}.pdf`);
+        }
+    </script>
+</body>
+
+</html>

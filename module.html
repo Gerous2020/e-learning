@@ -60,10 +60,10 @@
         </div>
     </aside>
 
-    <script src="data.js"></script>
     <script src="sign_dictionary.js"></script>
+    <script src="client-api.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
             const moduleId = params.get('id');
 
@@ -75,28 +75,42 @@
 
             let synthesis = window.speechSynthesis;
             let currentUtterance = null;
+            let currentModuleContent = ""; // Store for TTS
 
-            if (moduleId && moduleData[moduleId]) {
-                const data = moduleData[moduleId];
-                titleEl.textContent = data.title;
-                contentEl.textContent = data.content;
-                iconEl.className = data.icon;
+            if (moduleId) {
+                try {
+                    // FETCH FROM API
+                    const data = await api.getCourseById(moduleId);
+
+                    if (data && data.title) {
+                        titleEl.textContent = data.title;
+                        contentEl.textContent = data.content || data.description;
+                        iconEl.className = data.icon || 'fas fa-book';
+                        currentModuleContent = contentEl.textContent;
+                    } else {
+                        throw new Error('Module not found');
+                    }
+                } catch (err) {
+                    titleEl.textContent = "Error Loading Module";
+                    contentEl.textContent = "Could not connect to the Backend API. Please ensure the server is running.";
+                    console.error(err);
+                }
             } else {
-                titleEl.textContent = "Module Not Found";
-                contentEl.textContent = "Sorry, we couldn't find that module.";
+                titleEl.textContent = "No Module Selected";
+                contentEl.textContent = "Please go back to home and select a module.";
             }
 
-            // Audio Mode Toggle (Simple reuse)
+            // Audio Mode Toggle
             document.getElementById('audio-mode-toggle').addEventListener('click', () => {
                 document.body.classList.toggle('high-contrast');
             });
 
             // Play Logic with Sync
             document.getElementById('play-module').addEventListener('click', () => {
-                if (!moduleId || !moduleData[moduleId]) return;
+                if (!currentModuleContent) return;
 
                 synthesis.cancel(); // Stop previous
-                const text = moduleData[moduleId].content;
+                const text = currentModuleContent;
                 currentUtterance = new SpeechSynthesisUtterance(text);
                 currentUtterance.rate = 0.9;
 

@@ -397,33 +397,66 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* --- GLOBAL VOICE COMMAND SYSTEM --- */
+    /* --- GLOBAL VOICE COMMAND SYSTEM --- */
     window.processCommand = function (command) {
+        command = command.toLowerCase();
         // Feedback
         speak(`Command received: ${command}`);
 
-        if (command.includes("home") || command.includes("back")) {
+        // Navigation / Scroll
+        if (command.includes("home") || command.includes("top")) {
             window.location.href = "index.html";
+        }
+        else if (command.includes("assessment") || command.includes("quiz")) {
+            const section = document.getElementById('assessment');
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                speak("Moving to Assessment Zone.");
+            }
+        }
+        else if (command.includes("module") || command.includes("course")) {
+            document.getElementById('modules').scrollIntoView({ behavior: 'smooth' });
+            speak("Here are the learning modules.");
+        }
+
+        // Specific Modules
+        else if (command.includes("math")) {
+            window.location.href = "module.html?id=math";
+        }
+        else if (command.includes("science")) {
+            window.location.href = "module.html?id=science";
+        }
+        else if (command.includes("computer") || command.includes("coding")) {
+            window.location.href = "module.html?id=cs";
+        }
+        else if (command.includes("language") || command.includes("english")) {
+            window.location.href = "module.html?id=language";
+        }
+
+        // Tools
+        else if (command.includes("audio mode")) {
+            document.getElementById('audio-mode-toggle').click();
+        }
+        else if (command.includes("sign language")) {
+            document.querySelector('.sign-language-panel').style.display = 'block';
+            speak("Opening Sign Language Interpreter.");
         }
         else if (command.includes("help") || command.includes("emergency")) {
             document.getElementById('emergency-btn').click();
         }
-        else if (command.includes("audio mode")) {
-            document.getElementById('audio-mode-toggle').click();
-        }
-        else if (command.includes("open math")) {
-            window.location.href = "module.html?id=math";
-        }
-        else if (command.includes("open science")) {
-            window.location.href = "module.html?id=science";
-        }
-        else if (command.includes("read")) {
+
+        // Module Page Controls
+        else if (command.includes("read") || command.includes("play")) {
             const playBtn = document.getElementById('play-module');
             if (playBtn) playBtn.click();
         }
-        else if (command.includes("stop")) {
+        else if (command.includes("stop") || command.includes("pause")) {
             const stopBtn = document.getElementById('stop-module');
             if (stopBtn) stopBtn.click();
             window.speechSynthesis.cancel();
+        }
+        else {
+            speak("Sorry, I didn't understand that command.");
         }
     };
 

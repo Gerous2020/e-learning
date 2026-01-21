@@ -40,6 +40,8 @@
             <div class="user-controls">
                 <a href="teacher.html" aria-label="Teacher and Caregiver Panel"><i
                         class="fas fa-chalkboard-teacher"></i> Teacher Panel</a>
+                <a href="login.html" class="secondary-button"
+                    style="padding: 5px 10px; font-size: 0.9em; margin-left: 10px;">Login</a>
             </div>
         </div>
     </nav>
@@ -138,6 +140,32 @@
             </div>
         </section>
 
+        <section id="sign-language-promo" style="background:#fff; border-left: 5px solid var(--primary-color);">
+            <h2><i class="fas fa-sign-language"></i> Sign Language Presentation</h2>
+            <p>Our platform features a <strong>Real-time Sign Language Interpreter</strong>.</p>
+            <div style="display:flex; gap:2rem; align-items:center; flex-wrap:wrap; margin-top:2rem;">
+                <div style="flex:1; min-width:300px;">
+                    <ul>
+                        <li><i class="fas fa-check-circle" style="color:green;"></i> <strong>Automatic Sync:</strong>
+                            Signs appear as text is read.</li>
+                        <li><i class="fas fa-check-circle" style="color:green;"></i> <strong>Fingerspelling:</strong>
+                            100% accurate A-Z spelling for every word.</li>
+                        <li><i class="fas fa-check-circle" style="color:green;"></i> <strong>Visual Learning:</strong>
+                            Enhances comprehension for Deaf students.</li>
+                    </ul>
+                    <button id="demo-sl-btn" class="cta-button" style="margin-top:1rem;">Try It Now</button>
+                </div>
+                <div style="flex:1; text-align:center;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Sign_language_A.svg/100px-Sign_language_A.svg.png"
+                        alt="ASL Sign A" style="width:60px; margin:5px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Sign_language_S.svg/100px-Sign_language_S.svg.png"
+                        alt="ASL Sign S" style="width:60px; margin:5px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Sign_language_L.svg/100px-Sign_language_L.svg.png"
+                        alt="ASL Sign L" style="width:60px; margin:5px;">
+                </div>
+            </div>
+        </section>
+
         <section id="library" aria-labelledby="library-title">
             <h2 id="library-title">Digital Library</h2>
             <div class="card-grid">
@@ -187,12 +215,91 @@
     <iframe id="pdf-viewer-frame" style="display:none;"></iframe>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script>
-        // Initialize PDF.js worker
         if (window.pdfjsLib) {
             window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
         }
     </script>
+    <script src="client-api.js"></script>
     <script src="script.js"></script>
+
+    <!-- Main UI Initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Initializing AccessLearn UI...");
+
+            // 1. Auth & Dropdown Logic
+            const user = api.getUser();
+            if (user) {
+                const userControls = document.querySelector('.user-controls');
+
+                // Remove generic login button
+                const existingLogin = userControls.querySelector('a[href="login.html"]');
+                if (existingLogin) existingLogin.remove();
+
+                // Inject Dropdown HTML
+                const dropdownHtml = `
+                    <div class="user-dropdown" style="position: relative; display: inline-block;">
+                        <button class="dropdown-toggle" style="background:none; border:none; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; gap:0.5rem; color:var(--text-color);">
+                            <i class="fas fa-user-circle" style="font-size:1.5rem; color:var(--primary-color);"></i>
+                            <span>${user.name}</span>
+                            <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-menu" style="display:none; position:absolute; right:0; background-color:var(--card-bg); min-width:180px; box-shadow:0 8px 16px rgba(0,0,0,0.2); z-index:1000; border-radius:8px; overflow:hidden;">
+                            <a href="dashboard.html" style="display:block; padding:12px; color:var(--text-color); text-decoration:none; border-bottom:1px solid #eee;">
+                                <i class="fas fa-tachometer-alt"></i> My Dashboard
+                            </a>
+                            <a href="#" id="logout-btn" style="display:block; padding:12px; color:var(--accent-color); text-decoration:none;">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                `;
+
+                // Append
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = dropdownHtml;
+                userControls.appendChild(wrapper.firstElementChild);
+
+                // Add Event Listeners for Dropdown
+                const dd = userControls.querySelector('.user-dropdown');
+                const menu = dd.querySelector('.dropdown-menu'); // Fix: get menu from inside dd
+
+                // Hover
+                dd.addEventListener('mouseenter', () => menu.style.display = 'block');
+                dd.addEventListener('mouseleave', () => menu.style.display = 'none');
+
+                // Click (for mobile/touch)
+                dd.querySelector('.dropdown-toggle').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                });
+
+                // Logout
+                document.getElementById('logout-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    api.logout();
+                });
+            }
+
+            // 2. Fix Demo Button
+            const demoBtn = document.getElementById('demo-sl-btn');
+            if (demoBtn) {
+                demoBtn.addEventListener('click', () => {
+                    const panel = document.querySelector('.sign-language-panel');
+                    if (panel) panel.style.display = 'block';
+
+                    if (typeof updateSignPanel === 'function') {
+                        updateSignPanel("WELCOME");
+                    }
+
+                    if (window.speechSynthesis) {
+                        window.speechSynthesis.cancel();
+                        window.speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Sign Language Mode"));
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

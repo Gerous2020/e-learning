@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AccessLearn</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <a href="index.html" style="color:white; text-decoration:none;">AccessLearn</a>
+            </div>
+        </div>
+    </nav>
+    <main
+        style="max-width:400px; margin:2rem auto; padding:2rem; background:white; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+        <h1 style="text-align:center;">Login</h1>
+        <form id="login-form" style="display:flex; flex-direction:column; gap:1rem;">
+            <div>
+                <label for="email">Email</label>
+                <input type="email" id="email" required style="width:100%; padding:0.5rem;">
+            </div>
+            <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" required style="width:100%; padding:0.5rem;">
+            </div>
+            <button type="submit" class="cta-button">Sign In</button>
+        </form>
+        <p style="text-align:center; margin-top:1rem;">
+            No account? <a href="register.html">Register here</a>
+        </p>
+        <div id="error-msg" style="color:red; text-align:center;"></div>
+    </main>
+    <script src="client-api.js"></script>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await api.login(email, password);
+                if (res.token) {
+                    window.location.href = 'index.html';
+                } else {
+                    document.getElementById('error-msg').textContent = res.message;
+                }
+            } catch (err) {
+                document.getElementById('error-msg').textContent = 'Server Error';
+            }
+        });
+    </script>
+</body>
+
+</html>
