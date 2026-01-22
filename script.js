@@ -79,13 +79,28 @@ document.addEventListener('DOMContentLoaded', () => {
     function populateVoices() {
         voices = synthesis.getVoices();
         voiceSelect.innerHTML = '<option value="default">Default Voice</option>';
+        const savedVoice = api.getPreferredVoice();
 
-        voices.forEach((voice, index) => {
+        voices.forEach((voice) => {
             const option = document.createElement('option');
             option.textContent = `${voice.name} (${voice.lang})`;
-            option.value = index;
-            // Simple logic to prefer "Google US English" or similar if needed
+            option.value = voice.name; // Save name instead of index
+
+            if (savedVoice === voice.name) {
+                option.selected = true;
+            }
             voiceSelect.appendChild(option);
+        });
+
+        // Event Listener for Change
+        voiceSelect.addEventListener('change', () => {
+            const selected = voiceSelect.value;
+            if (selected !== 'default') {
+                api.setPreferredVoice(selected);
+                speak("Voice updated.");
+            } else {
+                localStorage.removeItem('preferredVoice');
+            }
         });
     }
 
@@ -101,9 +116,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (force) synthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(text);
-        const selectedVoiceIndex = voiceSelect.value;
-        if (selectedVoiceIndex !== 'default') {
-            utterance.voice = voices[selectedVoiceIndex];
+
+
+        // Use Preferred Voice
+        const preferredVoiceName = api.getPreferredVoice();
+        if (preferredVoiceName) {
+            const voice = voices.find(v => v.name === preferredVoiceName);
+            if (voice) utterance.voice = voice;
         }
 
         utterance.rate = 0.9;
@@ -465,9 +484,9 @@ document.addEventListener('DOMContentLoaded', () => {
     assessButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
             if (e.target.classList.contains('read-book-btn')) {
-                speak(`Opening book: ${e.target.dataset.book}`);
-                // In future: Open PDF viewer with this book loaded
-                pdfContent.textContent = `Content of ${e.target.dataset.book} loaded... [Simulated Book Content]`;
+                const bookName = e.target.dataset.book;
+                speak(`Opening book: ${bookName}`);
+                window.location.href = `book.html?libraryBook=${encodeURIComponent(bookName)}`;
             } else {
                 speak("Starting Assessment.");
                 window.startQuiz();

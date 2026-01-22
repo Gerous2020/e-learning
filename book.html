@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Reader - AccessLearn</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <nav aria-label="Book Navigation">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="#" id="back-link"
+                    style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Module</span>
+                </a>
+            </div>
+            <div class="user-controls">
+                <button id="audio-mode-toggle" aria-label="Toggle Audio Mode"><i class="fas fa-headphones"></i> Audio
+                    Mode</button>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        <section class="module-container" style="max-width: 800px; margin: 2rem auto; padding: 2rem;">
+            <div id="book-header" style="text-align: center; margin-bottom: 2rem;">
+                <i id="book-icon" class="fas fa-book-open"
+                    style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                <h1 id="book-title">Loading Book...</h1>
+                <h3 id="book-author" style="color: #666;"></h3>
+            </div>
+
+            <div class="card" style="padding: 3rem; font-size: 1.25rem; line-height: 1.8;">
+                <div id="book-content" style="white-space: pre-wrap;">
+                    Please select a valid book.
+                </div>
+            </div>
+
+            <div class="controls"
+                style="text-align: center; margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+                <button id="play-book" class="cta-button"><i class="fas fa-play"></i> Read Aloud</button>
+                <button id="pause-book" class="secondary-button"><i class="fas fa-pause"></i> Pause</button>
+                <button id="stop-book" class="secondary-button"><i class="fas fa-stop"></i> Stop</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="client-api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const moduleId = params.get('moduleId');
+            const bookIndex = parseInt(params.get('bookIndex'));
+            const libraryBookName = params.get('libraryBook');
+
+            const titleEl = document.getElementById('book-title');
+            const authorEl = document.getElementById('book-author');
+            const contentEl = document.getElementById('book-content');
+            const backLink = document.getElementById('back-link');
+
+            let synthesis = window.speechSynthesis;
+            let currentUtterance = null;
+            let currentBookContent = "";
+
+            // Wait for voices to be loaded
+            let voices = [];
+            function loadVoices() {
+                voices = synthesis.getVoices();
+            }
+            loadVoices();
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = loadVoices;
+            }
+
+            if (libraryBookName) {
+                // HANDLE DIGITAL LIBRARY BOOK
+                backLink.href = "index.html#library";
+                backLink.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Library';
+
+                titleEl.textContent = libraryBookName;
+                authorEl.textContent = "Digital Library Collection";
+
+                // Dictionary for library books
+                const libraryContent = {
+                    "Space Science": "Space is a three-dimensional continuum containing positions and directions. In classical physics, physical space is often conceived in three linear dimensions. Space science encompasses all of the scientific disciplines that involve space exploration and study natural phenomena and physical bodies occurring in outer space, such as space medicine and astrobiology.",
+                    "Great History": "History is the study of change over time, and it covers all aspects of human society. Political, social, economic, scientific, technological, and cultural developments are all part of history. Great historical events have shaped the world we live in today, from the rise and fall of empires to the industrial revolution.",
+                    "Computer Basics": "A computer is a machine that can be instructed to carry out sequences of arithmetic or logical operations automatically via computer programming. Modern computers have the ability to follow generalized sets of operations, called programs. These programs enable computers to perform an extremely wide range of tasks."
+                };
+
+                currentBookContent = libraryContent[libraryBookName] || "Content not found for this library book.";
+                contentEl.textContent = currentBookContent;
+
+            } else if (moduleId && !isNaN(bookIndex)) {
+                backLink.href = `module.html?id=${moduleId}`;
+                try {
+                    const data = await api.getCourseById(moduleId);
+
+                    if (data && data.books && data.books[bookIndex]) {
+                        const book = data.books[bookIndex];
+                        titleEl.textContent = book.title;
+                        authorEl.textContent = `by ${book.author}`;
+                        contentEl.textContent = book.content || "No content available for this book.";
+                        currentBookContent = contentEl.textContent;
+                    } else {
+                        throw new Error('Book not found');
+                    }
+                } catch (err) {
+                    titleEl.textContent = "Error Loading Book";
+                    contentEl.textContent = "Could not load the book content.";
+                    console.error(err);
+                }
+            } else {
+                titleEl.textContent = "No Book Selected";
+                contentEl.textContent = "Please go back and select a book.";
+            }
+
+            // Audio Mode Toggle
+            document.getElementById('audio-mode-toggle').addEventListener('click', () => {
+                document.body.classList.toggle('high-contrast');
+            });
+
+            // TTS Logic
+            document.getElementById('play-book').addEventListener('click', () => {
+                if (!currentBookContent) return;
+
+                synthesis.cancel(); // Stop previous
+                currentUtterance = new SpeechSynthesisUtterance(currentBookContent);
+
+                // Use Preferred Voice
+                const preferredVoiceName = api.getPreferredVoice();
+                if (preferredVoiceName) {
+                    const voice = voices.find(v => v.name === preferredVoiceName);
+                    if (voice) currentUtterance.voice = voice;
+                }
+
+                currentUtterance.rate = 0.9;
+
+                // Simple highlight (optional, can be improved like module.html)
+                currentUtterance.onstart = () => {
+                    document.getElementById('play-book').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reading...';
+                }
+
+                currentUtterance.onend = () => {
+                    document.getElementById('play-book').innerHTML = '<i class="fas fa-play"></i> Read Aloud';
+                }
+
+                synthesis.speak(currentUtterance);
+            });
+
+            document.getElementById('pause-book').addEventListener('click', () => {
+                if (synthesis.paused) synthesis.resume();
+                else synthesis.pause();
+            });
+
+            document.getElementById('stop-book').addEventListener('click', () => {
+                synthesis.cancel();
+                document.getElementById('play-book').innerHTML = '<i class="fas fa-play"></i> Read Aloud';
+            });
+        });
+    </script>
+</body>
+
+</html>

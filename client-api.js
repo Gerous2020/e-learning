@@ -46,6 +46,15 @@ const api = {
     getCourseById: async (id) => {
         const res = await fetch(`${API_BASE}/courses/${id}`);
         return await res.json();
+    },
+
+    // Voice Settings
+    setPreferredVoice: (voiceName) => {
+        localStorage.setItem('preferredVoice', voiceName);
+    },
+
+    getPreferredVoice: () => {
+        return localStorage.getItem('preferredVoice');
     }
 };
 

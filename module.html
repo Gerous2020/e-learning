@@ -20,6 +20,8 @@
                 </a>
             </div>
             <div class="user-controls">
+                <button id="voice-command-toggle" aria-label="Toggle Voice Commands"><i class="fas fa-microphone"></i>
+                    Voice Control</button>
                 <button id="audio-mode-toggle" aria-label="Toggle Audio Mode"><i class="fas fa-headphones"></i> Audio
                     Mode</button>
             </div>
@@ -38,6 +40,15 @@
                 <div id="module-content">
                     Please select a valid module.
                 </div>
+            </div>
+
+            <!-- Recommended Books Section -->
+            <div id="module-books-container" class="card" style="margin-top: 2rem; padding: 2rem; display: none;">
+                <h2 style="color: var(--primary-color); margin-bottom: 1rem;"><i class="fas fa-book-open"></i>
+                    Recommended Books</h2>
+                <ul id="module-books" style="list-style: none; padding: 0;">
+                    <!-- Books will be injected here -->
+                </ul>
             </div>
 
             <div class="controls"
@@ -87,6 +98,40 @@
                         contentEl.textContent = data.content || data.description;
                         iconEl.className = data.icon || 'fas fa-book';
                         currentModuleContent = contentEl.textContent;
+
+                        // Render Books
+                        if (data.books && data.books.length > 0) {
+                            const booksContainer = document.getElementById('module-books-container');
+                            const booksList = document.getElementById('module-books');
+                            booksList.innerHTML = ''; // Clear existing
+
+                            data.books.forEach((book, index) => {
+                                const li = document.createElement('li');
+                                li.style.marginBottom = '1rem';
+                                li.style.padding = '1rem';
+                                li.style.backgroundColor = '#f8f9fa';
+                                li.style.borderRadius = '8px';
+                                li.style.display = 'flex';
+                                li.style.alignItems = 'center';
+                                li.style.gap = '1rem';
+
+                                li.innerHTML = `
+                                    <i class="fas fa-book" style="color: var(--secondary-color); font-size: 1.5rem;"></i>
+                                    <div style="flex: 1;">
+                                        <h3 style="margin: 0; font-size: 1.2rem;">${book.title}</h3>
+                                        <p style="margin: 0; color: #666;">by ${book.author}</p>
+                                    </div>
+                                    <a href="book.html?moduleId=${moduleId}&bookIndex=${index}" class="primary-button" style="text-decoration: none; padding: 0.5rem 1rem; background-color: var(--primary-color); color: white; border-radius: 5px; font-size: 0.9rem;">
+                                        <i class="fas fa-book-open"></i> Read Now
+                                    </a>
+                                `;
+                                booksList.appendChild(li);
+                            });
+                            booksContainer.style.display = 'block';
+                        } else {
+                            document.getElementById('module-books-container').style.display = 'none';
+                        }
+
                     } else {
                         throw new Error('Module not found');
                     }
@@ -112,6 +157,15 @@
                 synthesis.cancel(); // Stop previous
                 const text = currentModuleContent;
                 currentUtterance = new SpeechSynthesisUtterance(text);
+
+                // Use Preferred Voice
+                let voices = synthesis.getVoices();
+                const preferredVoiceName = api.getPreferredVoice();
+                if (preferredVoiceName) {
+                    const voice = voices.find(v => v.name === preferredVoiceName);
+                    if (voice) currentUtterance.voice = voice;
+                }
+
                 currentUtterance.rate = 0.9;
 
                 // SYNC IMPLEMENTATION
@@ -189,6 +243,49 @@
             document.getElementById('stop-module').addEventListener('click', () => {
                 synthesis.cancel();
             });
+
+
+            // Voice Control Logic
+            const voiceBtn = document.getElementById('voice-command-toggle');
+            if (voiceBtn && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.lang = 'en-US';
+                let isListening = false;
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    voiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Listening...';
+                    voiceBtn.style.color = 'var(--accent-color)';
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    voiceBtn.innerHTML = '<i class="fas fa-microphone"></i> Voice Control';
+                    voiceBtn.style.color = 'inherit';
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+                    console.log('Voice Command:', transcript);
+
+                    if (transcript.includes('start') || transcript.includes('read')) {
+                        document.getElementById('play-module').click();
+                    } else if (transcript.includes('stop')) {
+                        document.getElementById('stop-module').click();
+                    } else if (transcript.includes('pause')) {
+                        document.getElementById('pause-module').click();
+                    }
+                };
+
+                voiceBtn.addEventListener('click', () => {
+                    if (isListening) recognition.stop();
+                    else recognition.start();
+                });
+            } else if (voiceBtn) {
+                voiceBtn.style.display = 'none';
+            }
         });
     </script>
 </body>

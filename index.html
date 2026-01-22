@@ -141,7 +141,7 @@
         </section>
 
         <section id="sign-language-promo" style="background:#fff; border-left: 5px solid var(--primary-color);">
-            <h2><i class="fas fa-sign-language"></i> Sign Language Presentation</h2>
+            <h2><i class="fas fa-sign-language"></i> Future Scope: Sign Language Presentation</h2>
             <p>Our platform features a <strong>Real-time Sign Language Interpreter</strong>.</p>
             <div style="display:flex; gap:2rem; align-items:center; flex-wrap:wrap; margin-top:2rem;">
                 <div style="flex:1; min-width:300px;">
@@ -297,6 +297,50 @@
                         window.speechSynthesis.speak(new SpeechSynthesisUtterance("Welcome to Sign Language Mode"));
                     }
                 });
+            }
+
+            // 3. Voice Control Logic
+            const voiceBtn = document.getElementById('voice-command-btn');
+            if (voiceBtn && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                recognition.continuous = false; // Single command mode
+                recognition.lang = 'en-US';
+                let isListening = false;
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    voiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Listening...';
+                    voiceBtn.style.color = 'var(--accent-color)';
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    voiceBtn.innerHTML = '<i class="fas fa-microphone"></i> Voice Control';
+                    voiceBtn.style.color = 'inherit';
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript.toLowerCase();
+                    console.log('Voice Command:', transcript);
+
+                    if (transcript.includes('math')) window.location.href = 'module.html?id=math';
+                    else if (transcript.includes('science')) window.location.href = 'module.html?id=science';
+                    else if (transcript.includes('language')) window.location.href = 'module.html?id=language';
+                    else if (transcript.includes('computer') || transcript.includes('coding')) window.location.href = 'module.html?id=cs';
+                    else if (transcript.includes('art') || transcript.includes('music')) window.location.href = 'module.html?id=art';
+                    else if (transcript.includes('life')) window.location.href = 'module.html?id=life';
+                    else if (transcript.includes('physical') || transcript.includes('pe')) window.location.href = 'module.html?id=pe';
+                    else if (transcript.includes('history')) window.location.href = 'module.html?id=history';
+                };
+
+                voiceBtn.addEventListener('click', () => {
+                    if (isListening) recognition.stop();
+                    else recognition.start();
+                });
+            } else if (voiceBtn) {
+                voiceBtn.style.display = 'none';
+                console.log("Web Speech API not supported");
             }
         });
     </script>
