@@ -114,6 +114,54 @@
                     contentEl.textContent = "Could not load the book content.";
                     console.error(err);
                 }
+
+            } else if (params.get('storyBook')) {
+                // HANDLE STORIES
+                backLink.href = "index.html#library";
+                backLink.querySelector('span').textContent = 'Back to Library';
+
+                const storyKey = params.get('storyBook');
+
+                const stories = {
+                    "lion-mouse": {
+                        title: "The Lion and the Mouse",
+                        author: "Aesop's Fables",
+                        icon: "fas fa-paw",
+                        content: `Once upon a time, a mighty Lion lay sleeping in the forest. A tiny Mouse, not watching where she was running, accidentally ran across the Lion's nose and woke him up.\n\nThe Lion angrily caught the Mouse and roared, "How dare you wake me! I shall eat you for this!"\n\nThe trembling Mouse cried, "Please, great Lion, spare me! I did not mean to disturb you. If you let me go, perhaps I can help you one day."\n\nThe Lion laughed and said, "Ha! A tiny Mouse help ME? That is the funniest thing I have ever heard!" But the Lion was in a good mood, so he let the Mouse go.\n\nA few days later, the Lion was prowling through the forest when he fell into a hunter's net. He roared and struggled, but the ropes only tightened around him.\n\nThe little Mouse heard the Lion's roars and ran to see what had happened. She saw her friend trapped in the net. Without a moment's hesitation, the Mouse began gnawing on the ropes with her sharp little teeth.\n\nGnaw, gnaw, gnaw. One by one, the ropes snapped apart. Soon, the Lion was free!\n\n"You laughed when I said I could help you," said the Mouse. "But you see, even a small mouse can help a mighty lion."\n\nThe Lion bowed his great head humbly and said, "You are right, little friend. I was wrong to laugh. Thank you — you have saved my life."\n\nFrom that day on, the Lion and the Mouse were the best of friends.\n\nMoral: No act of kindness, however small, is ever wasted. Even the mighty may need the help of the weak.`
+                    },
+                    "cinderella": {
+                        title: "Cinderella",
+                        author: "Classic Fairy Tale",
+                        icon: "fas fa-crown",
+                        content: `Once upon a time, in a kingdom far away, there lived a kind and gentle girl named Cinderella. She lived with her stepmother and two stepsisters, who made her do all the chores. Despite being treated poorly, Cinderella remained cheerful and hopeful.\n\nOne day, an invitation arrived from the royal palace. The Prince was hosting a grand ball, and all the young women in the kingdom were invited. Cinderella's stepsisters were excited, but her stepmother told Cinderella she could not go.\n\nAs Cinderella sat alone weeping, her Fairy Godmother appeared in a swirl of sparkles.\n\n"Dry your tears, my dear," said the Fairy Godmother. "You SHALL go to the ball!"\n\nWith a wave of her magic wand, she turned a pumpkin into a golden carriage, mice into white horses, and Cinderella's ragged clothes into a beautiful shimmering gown. On Cinderella's feet appeared a pair of delicate glass slippers.\n\n"Remember," the Fairy Godmother warned, "the magic will end at the stroke of midnight. Be home before the clock strikes twelve!"\n\nAt the ball, the Prince noticed Cinderella the moment she walked in. They danced together all evening, and the Prince was completely enchanted by her grace and kindness.\n\nThen the clock began to strike midnight — BONG! BONG! BONG!\n\nCinderella remembered the warning. She ran from the ballroom as fast as she could. In her hurry, she lost one of her glass slippers on the palace stairs.\n\nThe next morning, the Prince declared he would search the entire kingdom for the girl whose foot fit the glass slipper. When the Prince's men arrived at Cinderella's home, her stepsisters both tried on the slipper, but it fit neither of them.\n\nThen Cinderella asked if she could try. Her stepmother laughed, but the Prince insisted. Cinderella sat down, and the slipper slid perfectly onto her foot. Then she pulled the other slipper from her pocket.\n\nThe Prince recognized her immediately. "It is you!" he cried joyfully.\n\nCinderella and the Prince were married shortly after. They lived happily ever after, and Cinderella showed kindness and forgiveness even to her stepsisters.\n\nMoral: Kindness, patience, and a pure heart will always be rewarded.`
+                    },
+                    "tortoise-hare": {
+                        title: "The Tortoise and the Hare",
+                        author: "Aesop's Fables",
+                        icon: "fas fa-running",
+                        content: `Once upon a time, in a forest filled with animals of all kinds, there lived a Hare who was very proud of how fast he could run.\n\nEvery day, the Hare would boast to the other animals. "I am the fastest creature in the entire forest! No one can beat me!"\n\nOne day, a slow old Tortoise finally had enough of the Hare's boasting. "I challenge you to a race," said the Tortoise calmly.\n\nAll the animals burst out laughing — all except the Hare. He accepted the challenge, grinning with confidence. "A race? Against a slow tortoise? This will be the easiest thing I have ever done!"\n\nThe next morning, all the animals gathered at the starting line. The Fox waved a flag, and the race began.\n\nThe Hare shot off like an arrow, his legs a blur. In no time, he was far ahead of the Tortoise, who plodded along steadily — one step at a time. Slow and steady.\n\nThe Hare looked back and could barely see the Tortoise. He laughed out loud. "I have so much time! I will take a little nap here in the shade and still wake up in time to win."\n\nThe Hare lay down under a shady tree and quickly fell fast asleep.\n\nMeanwhile, the Tortoise kept going. Slowly but surely, one steady step after another, he passed the sleeping Hare.\n\nThe Hare finally woke up and stretched. "Time to finish the race," he yawned. But when he looked at the finish line, he gasped.\n\nThe Tortoise was just crossing it!\n\nAll the animals cheered. The Tortoise had won!\n\nThe Hare rushed to the finish line, out of breath and red-faced with embarrassment. He hung his head in shame.\n\nThe Tortoise smiled gently and said, "Slow and steady wins the race, my friend."\n\nMoral: Consistency, determination, and hard work will always overcome arrogance and overconfidence.`
+                    },
+                    "uploaded": {
+                        title: sessionStorage.getItem('uploadedStoryName') || "Uploaded Story",
+                        author: "Uploaded PDF",
+                        icon: "fas fa-file-pdf",
+                        content: sessionStorage.getItem('uploadedStoryText') || "No uploaded story found. Please go back and upload a PDF."
+                    }
+                };
+
+                const story = stories[storyKey];
+                if (story) {
+                    titleEl.textContent = story.title;
+                    authorEl.textContent = story.author;
+                    document.getElementById('book-icon').className = story.icon;
+                    document.getElementById('book-icon').style.cssText = 'font-size:4rem; color:var(--primary-color); margin-bottom:1rem;';
+                    contentEl.textContent = story.content;
+                    currentBookContent = story.content;
+                } else {
+                    titleEl.textContent = "Story Not Found";
+                    contentEl.textContent = "Sorry, we could not find the story you requested.";
+                }
+
             } else {
                 titleEl.textContent = "No Book Selected";
                 contentEl.textContent = "Please go back and select a book.";

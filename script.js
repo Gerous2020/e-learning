@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Bind the 'Go to Assessments' button
+    // Bind the 'Go to Assessments' button and read-book buttons
     const assessButtons = document.querySelectorAll('#assessment button, .read-book-btn');
     assessButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -493,4 +493,68 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // --- Stories Section ---
+
+    // Default story buttons
+    document.querySelectorAll('.read-story-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const storyKey = btn.dataset.story;
+            speak(`Opening story.`);
+            window.location.href = `book.html?storyBook=${encodeURIComponent(storyKey)}`;
+        });
+    });
+
+    // PDF Upload for Stories
+    const storyPdfInput = document.getElementById('story-pdf-upload');
+    const storyUploadStatus = document.getElementById('story-upload-status');
+    const readUploadedBtn = document.getElementById('read-uploaded-story-btn');
+
+    if (storyPdfInput) {
+        storyPdfInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            storyUploadStatus.textContent = '⏳ Reading PDF...';
+            readUploadedBtn.style.display = 'none';
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+
+                if (!window.pdfjsLib) {
+                    storyUploadStatus.textContent = '❌ PDF library not loaded. Please refresh.';
+                    return;
+                }
+
+                const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                let fullText = '';
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    const pageText = content.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\n';
+                }
+
+                if (fullText.trim().length === 0) {
+                    storyUploadStatus.textContent = '⚠️ No readable text found in this PDF (it may be image-based).';
+                    return;
+                }
+
+                // Store in sessionStorage and show read button
+                sessionStorage.setItem('uploadedStoryText', fullText.trim());
+                sessionStorage.setItem('uploadedStoryName', file.name.replace('.pdf', ''));
+                storyUploadStatus.textContent = `✅ "${file.name}" loaded! (${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''})`;
+                readUploadedBtn.style.display = 'inline-block';
+
+            } catch (err) {
+                console.error('PDF parse error:', err);
+                storyUploadStatus.textContent = '❌ Could not read PDF. Please try another file.';
+            }
+        });
+
+        readUploadedBtn.addEventListener('click', () => {
+            window.location.href = 'book.html?storyBook=uploaded';
+        });
+    }
 });
