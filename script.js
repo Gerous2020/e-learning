@@ -6,6 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let audioModeActive = false;
     let synthesis = window.speechSynthesis;
 
+    // --- Restore Audio Mode State on Page Load ---
+    if (localStorage.getItem('audioModeActive') === 'true') {
+        audioModeActive = true;
+        document.body.classList.add('high-contrast');
+        if (audioModeToggle) {
+            audioModeToggle.innerHTML = '<i class="fas fa-volume-up"></i> Disable Audio Mode';
+        }
+    }
+
     // Toggle Audio Mode
     audioModeToggle.addEventListener('click', (e) => {
         e.preventDefault();
@@ -64,6 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function toggleAudioMode() {
         audioModeActive = !audioModeActive;
         document.body.classList.toggle('high-contrast');
+        // Persist state across pages
+        localStorage.setItem('audioModeActive', audioModeActive);
 
         const status = audioModeActive ? "Audio Mode Enabled. Hover over items to hear them." : "Audio Mode Disabled.";
         speak(status, true);
@@ -464,6 +475,29 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('emergency-btn').click();
         }
 
+        // Story Navigation (by voice)
+        else if (command.includes("story") || command.includes("stories") || command.includes("library")) {
+            const libSection = document.getElementById('library');
+            if (libSection) {
+                libSection.scrollIntoView({ behavior: 'smooth' });
+                speak("Here is the Digital Library and Stories section.");
+            } else {
+                window.location.href = "index.html#library";
+            }
+        }
+        else if (command.includes("lion") || command.includes("mouse")) {
+            speak("Opening The Lion and the Mouse.");
+            window.location.href = "book.html?storyBook=lion-mouse";
+        }
+        else if (command.includes("cinderella")) {
+            speak("Opening Cinderella.");
+            window.location.href = "book.html?storyBook=cinderella";
+        }
+        else if (command.includes("tortoise") || command.includes("hare") || command.includes("rabbit")) {
+            speak("Opening The Tortoise and the Hare.");
+            window.location.href = "book.html?storyBook=tortoise-hare";
+        }
+
         // Module Page Controls
         else if (command.includes("read") || command.includes("play")) {
             const playBtn = document.getElementById('play-module');
@@ -475,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.speechSynthesis.cancel();
         }
         else {
-            speak("Sorry, I didn't understand that command.");
+            speak("Sorry, I didn't understand that command. Try saying: stories, lion, cinderella, tortoise, math, science.");
         }
     };
 

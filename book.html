@@ -167,9 +167,18 @@
                 contentEl.textContent = "Please go back and select a book.";
             }
 
-            // Audio Mode Toggle
-            document.getElementById('audio-mode-toggle').addEventListener('click', () => {
-                document.body.classList.toggle('high-contrast');
+            // Audio Mode: Restore persisted state on load
+            const audioToggleBook = document.getElementById('audio-mode-toggle');
+            if (localStorage.getItem('audioModeActive') === 'true') {
+                document.body.classList.add('high-contrast');
+                if (audioToggleBook) audioToggleBook.innerHTML = '<i class="fas fa-volume-up"></i> Disable Audio Mode';
+            }
+            audioToggleBook.addEventListener('click', () => {
+                const isActive = document.body.classList.toggle('high-contrast');
+                localStorage.setItem('audioModeActive', isActive);
+                audioToggleBook.innerHTML = isActive
+                    ? '<i class="fas fa-volume-up"></i> Disable Audio Mode'
+                    : '<i class="fas fa-headphones"></i> Audio Mode';
             });
 
             // TTS Logic

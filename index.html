@@ -380,6 +380,13 @@
                     else if (transcript.includes('life')) window.location.href = 'module.html?id=life';
                     else if (transcript.includes('physical') || transcript.includes('pe')) window.location.href = 'module.html?id=pe';
                     else if (transcript.includes('history')) window.location.href = 'module.html?id=history';
+                    // Story Navigation
+                    else if (transcript.includes('story') || transcript.includes('stories') || transcript.includes('library')) {
+                        document.getElementById('library').scrollIntoView({ behavior: 'smooth' });
+                    }
+                    else if (transcript.includes('lion') || transcript.includes('mouse')) window.location.href = 'book.html?storyBook=lion-mouse';
+                    else if (transcript.includes('cinderella')) window.location.href = 'book.html?storyBook=cinderella';
+                    else if (transcript.includes('tortoise') || transcript.includes('hare') || transcript.includes('rabbit')) window.location.href = 'book.html?storyBook=tortoise-hare';
                 };
 
                 voiceBtn.addEventListener('click', () => {

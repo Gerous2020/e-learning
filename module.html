@@ -145,9 +145,19 @@
                 contentEl.textContent = "Please go back to home and select a module.";
             }
 
-            // Audio Mode Toggle
-            document.getElementById('audio-mode-toggle').addEventListener('click', () => {
-                document.body.classList.toggle('high-contrast');
+            // Audio Mode: Restore persisted state on load
+            const audioToggle = document.getElementById('audio-mode-toggle');
+            if (localStorage.getItem('audioModeActive') === 'true') {
+                document.body.classList.add('high-contrast');
+                if (audioToggle) audioToggle.innerHTML = '<i class="fas fa-volume-up"></i> Disable Audio Mode';
+            }
+
+            audioToggle.addEventListener('click', () => {
+                const isActive = document.body.classList.toggle('high-contrast');
+                localStorage.setItem('audioModeActive', isActive);
+                audioToggle.innerHTML = isActive
+                    ? '<i class="fas fa-volume-up"></i> Disable Audio Mode'
+                    : '<i class="fas fa-headphones"></i> Audio Mode';
             });
 
             // Play Logic with Sync
