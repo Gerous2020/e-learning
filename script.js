@@ -293,34 +293,54 @@ document.addEventListener('DOMContentLoaded', () => {
     stopPdfBtn.addEventListener('click', () => {
         synthesis.cancel();
     });
-    // Voice Command Button Logic
-    const voiceCmdBtn = document.getElementById('voice-command-btn');
-    if (voiceCmdBtn && 'webkitSpeechRecognition' in window) {
-        const cmdRecognition = new webkitSpeechRecognition();
-        cmdRecognition.continuous = false;
-        cmdRecognition.lang = 'en-US';
+    // ==================== GLOBAL VOICE LISTENER ====================
+    const globalVoiceBtn = document.getElementById('global-voice-btn');
+    let isVoiceModeActive = false;
+    let globalRecognition = null;
 
-        cmdRecognition.onstart = () => {
-            voiceCmdBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Listening...';
-            voiceCmdBtn.style.color = 'red';
+    if ('webkitSpeechRecognition' in window) {
+        globalRecognition = new webkitSpeechRecognition();
+        globalRecognition.continuous = true;
+        globalRecognition.interimResults = false;
+        globalRecognition.lang = 'en-US';
+
+        globalRecognition.onstart = () => {
+            if(globalVoiceBtn) {
+                globalVoiceBtn.classList.add('active');
+                globalVoiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            }
         };
 
-        cmdRecognition.onend = () => {
-            voiceCmdBtn.innerHTML = '<i class="fas fa-microphone"></i> Voice Control';
-            voiceCmdBtn.style.color = 'inherit';
+        globalRecognition.onend = () => {
+            if (isVoiceModeActive) {
+                // Auto-restart if it stopped due to silence but mode is still active
+                globalRecognition.start();
+            } else {
+                if(globalVoiceBtn) {
+                    globalVoiceBtn.classList.remove('active');
+                    globalVoiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                }
+            }
         };
 
-        cmdRecognition.onresult = (event) => {
-            const command = event.results[0][0].transcript.toLowerCase();
-            window.processCommand(command);
+        globalRecognition.onresult = (event) => {
+            const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+            window.processCommand(transcript);
         };
 
-        voiceCmdBtn.addEventListener('click', () => {
-            speak("Listening for command.");
-            cmdRecognition.start();
-        });
+        if(globalVoiceBtn) {
+            globalVoiceBtn.addEventListener('click', () => {
+                isVoiceModeActive = !isVoiceModeActive;
+                if (isVoiceModeActive) {
+                    speak("Voice Navigation Enabled.");
+                    globalRecognition.start();
+                } else {
+                    speak("Voice Navigation Disabled.");
+                    globalRecognition.stop();
+                }
+            });
+        }
     }
-
 
     /* --- Audio to Text (Dictation) --- */
     const startDictationBtn = document.getElementById('start-dictation');
@@ -427,89 +447,78 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* --- GLOBAL VOICE COMMAND SYSTEM --- */
-    /* --- GLOBAL VOICE COMMAND SYSTEM --- */
     window.processCommand = function (command) {
         command = command.toLowerCase();
         // Feedback
-        speak(`Command received: ${command}`);
+        speak(`Command: ${command}`);
 
-        // Navigation / Scroll
-        if (command.includes("home") || command.includes("top")) {
-            window.location.href = "index.html";
-        }
-        else if (command.includes("assessment") || command.includes("quiz")) {
-            const section = document.getElementById('assessment');
-            if (section) {
-                section.scrollIntoView({ behavior: 'smooth' });
-                speak("Moving to Assessment Zone.");
+        // SMART DOM MATCHING (Clicking buttons or links by voice)
+        if (command.includes("click") || command.includes("go to") || command.includes("open")) {
+            const actionTarget = command.replace("click", "").replace("go to", "").replace("open", "").trim();
+            
+            // Try explicit match first
+            if (actionTarget === "login") return window.location.href = "login.html";
+            if (actionTarget === "register" || actionTarget === "sign up") return window.location.href = "register.html";
+            if (actionTarget === "teacher panel" || actionTarget === "teacher view") return window.location.href = "teacher.html";
+            if (actionTarget === "dashboard" || actionTarget === "student view" || actionTarget === "dashboard view") return window.location.href = "dashboard.html";
+            if (actionTarget === "home" || actionTarget === "index") return window.location.href = "index.html";
+
+            // Fallback: search DOM for matching button / link
+            const elements = document.querySelectorAll('button, a, .cta-button, .secondary-button, input[type="button"], input[type="submit"]');
+            for (let el of elements) {
+                const elText = (el.innerText || el.value || "").toLowerCase();
+                const ariaLabel = (el.getAttribute('aria-label') || "").toLowerCase();
+                if (elText.includes(actionTarget) || ariaLabel.includes(actionTarget)) {
+                    speak(`Navigating or Executing`);
+                    el.click();
+                    return;
+                }
             }
         }
-        else if (command.includes("module") || command.includes("course")) {
-            document.getElementById('modules').scrollIntoView({ behavior: 'smooth' });
-            speak("Here are the learning modules.");
-        }
 
-        // Specific Modules
-        else if (command.includes("math")) {
-            window.location.href = "module.html?id=math";
-        }
-        else if (command.includes("science")) {
-            window.location.href = "module.html?id=science";
-        }
-        else if (command.includes("computer") || command.includes("coding")) {
-            window.location.href = "module.html?id=cs";
-        }
-        else if (command.includes("language") || command.includes("english")) {
-            window.location.href = "module.html?id=language";
-        }
+        // Generic Navigation / Scroll
+        if (command.includes("scroll down")) { window.scrollBy({top: window.innerHeight / 2, behavior: 'smooth'}); return; }
+        if (command.includes("scroll up")) { window.scrollBy({top: -window.innerHeight / 2, behavior: 'smooth'}); return; }
+        if (command.includes("top")) { window.scrollTo({top: 0, behavior: 'smooth'}); return; }
+        if (command.includes("back")) { window.history.back(); return; }
+
+        // Specific Modules Legacy Support
+        if (command.includes("math")) return window.location.href = "module.html?id=math";
+        if (command.includes("science")) return window.location.href = "module.html?id=science";
+        if (command.includes("computer") || command.includes("coding")) return window.location.href = "module.html?id=cs";
+        if (command.includes("language") || command.includes("english")) return window.location.href = "module.html?id=language";
+        if (command.includes("lion") || command.includes("mouse")) return window.location.href = "book.html?storyBook=lion-mouse";
+        if (command.includes("cinderella")) return window.location.href = "book.html?storyBook=cinderella";
+        if (command.includes("tortoise") || command.includes("hare")) return window.location.href = "book.html?storyBook=tortoise-hare";
 
         // Tools
-        else if (command.includes("audio mode")) {
-            document.getElementById('audio-mode-toggle').click();
+        if (command.includes("audio mode")) {
+            const btn = document.getElementById('audio-mode-toggle');
+            if(btn) btn.click();
+            return;
         }
-        else if (command.includes("sign language")) {
-            document.querySelector('.sign-language-panel').style.display = 'block';
-            speak("Opening Sign Language Interpreter.");
+        if (command.includes("sign language")) {
+            const slBtn = document.getElementById('toggle-sl');
+            if(slBtn) slBtn.click();
+            return;
         }
-        else if (command.includes("help") || command.includes("emergency")) {
-            document.getElementById('emergency-btn').click();
-        }
-
-        // Story Navigation (by voice)
-        else if (command.includes("story") || command.includes("stories") || command.includes("library")) {
-            const libSection = document.getElementById('library');
-            if (libSection) {
-                libSection.scrollIntoView({ behavior: 'smooth' });
-                speak("Here is the Digital Library and Stories section.");
-            } else {
-                window.location.href = "index.html#library";
-            }
-        }
-        else if (command.includes("lion") || command.includes("mouse")) {
-            speak("Opening The Lion and the Mouse.");
-            window.location.href = "book.html?storyBook=lion-mouse";
-        }
-        else if (command.includes("cinderella")) {
-            speak("Opening Cinderella.");
-            window.location.href = "book.html?storyBook=cinderella";
-        }
-        else if (command.includes("tortoise") || command.includes("hare") || command.includes("rabbit")) {
-            speak("Opening The Tortoise and the Hare.");
-            window.location.href = "book.html?storyBook=tortoise-hare";
+        if (command.includes("help") || command.includes("emergency")) {
+            const emBtn = document.getElementById('emergency-btn');
+            if(emBtn) emBtn.click();
+            return;
         }
 
         // Module Page Controls
-        else if (command.includes("read") || command.includes("play")) {
-            const playBtn = document.getElementById('play-module');
-            if (playBtn) playBtn.click();
+        if (command.includes("read") || command.includes("play")) {
+            const btn = document.getElementById('play-module') || document.getElementById('read-pdf-btn') || document.getElementById('read-uploaded-story-btn');
+            if (btn) btn.click();
+            return;
         }
-        else if (command.includes("stop") || command.includes("pause")) {
-            const stopBtn = document.getElementById('stop-module');
-            if (stopBtn) stopBtn.click();
+        if (command.includes("stop") || command.includes("pause") || command.includes("quiet")) {
+            const btn = document.getElementById('stop-module') || document.getElementById('stop-pdf-btn');
+            if (btn) btn.click();
             window.speechSynthesis.cancel();
-        }
-        else {
-            speak("Sorry, I didn't understand that command. Try saying: stories, lion, cinderella, tortoise, math, science.");
+            return;
         }
     };
 
